@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="relavoi_sdk_name">Relavoi SDK</string>
+    <string name="relavoi_verified_call_label">Verified · Relavoi</string>
+    <string name="relavoi_unverified_call_label">Not from Relavoi</string>
+</resources>

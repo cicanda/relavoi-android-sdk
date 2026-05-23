@@ -1,0 +1,36 @@
+name: CI
+
+on:
+  push:
+    branches: [main, develop]
+  pull_request:
+    branches: [main]
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up JDK 17
+        uses: actions/setup-java@v4
+        with:
+          distribution: "temurin"
+          java-version: "17"
+
+      - name: Set up Gradle
+        uses: gradle/actions/setup-gradle@v3
+
+      - name: Generate wrapper
+        # gradle-wrapper.jar is intentionally not committed (binary). The setup-gradle
+        # action provides the gradle CLI we use to materialize the wrapper jar.
+        run: gradle wrapper --gradle-version 8.7
+
+      - name: Build SDK (release)
+        run: ./gradlew :relavoi-sdk:assembleRelease
+
+      - name: Run SDK unit tests
+        run: ./gradlew :relavoi-sdk:test
+
+      - name: Build sample app (debug)
+        run: ./gradlew :sample-app:assembleDebug

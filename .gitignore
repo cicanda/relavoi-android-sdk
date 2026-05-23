@@ -1,0 +1,24 @@
+# Gradle
+.gradle/
+build/
+out/
+local.properties
+
+# Android Studio / IntelliJ
+.idea/
+*.iml
+captures/
+
+# Native build
+.cxx/
+
+# macOS
+.DS_Store
+
+# Keystore / secrets
+*.keystore
+*.jks
+secrets.properties
+
+# Kotlin
+.kotlin/

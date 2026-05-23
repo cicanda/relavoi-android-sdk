@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="utf-8"?>
+<manifest xmlns:android="http://schemas.android.com/apk/res/android">
+
+    <!-- Required for HTTP, WebSocket, FCM -->
+    <uses-permission android:name="android.permission.INTERNET" />
+    <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
+
+    <!--
+      Call verification — needed so CallVerificationManager can detect when the
+      device is on a call and decide whether the active call originated from a
+      Relavoi-masked proxy number. Host app must request it at runtime on
+      Android 8+.
+    -->
+    <uses-permission android:name="android.permission.READ_PHONE_STATE" />
+
+    <!--
+      FloatingBubbleService draws the verification bubble on top of other
+      apps while a verified call is active. Host app must request this
+      permission at runtime via Settings (Settings.ACTION_MANAGE_OVERLAY_PERMISSION).
+    -->
+    <uses-permission android:name="android.permission.SYSTEM_ALERT_WINDOW" />
+
+    <application>
+        <!--
+          FloatingBubbleService is declared here so host apps don't need to
+          duplicate the declaration. It's gated by the runtime overlay grant.
+        -->
+        <service
+            android:name=".overlay.FloatingBubbleService"
+            android:exported="false"
+            android:foregroundServiceType="specialUse" />
+    </application>
+</manifest>

@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">Relavoi Sample</string>
+
+    <string name="status_idle">Status: idle</string>
+    <string name="result_idle">Result: —</string>
+
+    <string name="btn_create">Create session</string>
+    <string name="btn_verify">Verify call</string>
+    <string name="btn_presence">Set presence online</string>
+    <string name="btn_end">End session</string>
+    <string name="btn_dial">Init call</string>
+</resources>
