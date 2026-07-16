@@ -18,5 +18,18 @@ data class VerificationResult(
     val verified: Boolean,
     val context: String? = null,
     val sessionId: String? = null,
+    val proxyNumber: String? = null,
     val expiresAt: String? = null,
-)
+) {
+    /**
+     * Ready-to-display banner text. The backend does not currently return a
+     * [context] string, so fall back to a generic label for verified calls.
+     * Returns null when the call could not be verified (show a warning instead).
+     */
+    val bannerText: String?
+        get() = when {
+            context != null -> context
+            verified -> "Verified call"
+            else -> null
+        }
+}

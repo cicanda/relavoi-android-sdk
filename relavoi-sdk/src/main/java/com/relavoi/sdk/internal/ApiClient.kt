@@ -72,6 +72,11 @@ internal class ApiClient(
         Request.Builder().url(fullUrl(path)).delete().build()
     )
 
+    /** DELETE request carrying a JSON body (some endpoints read the body on DELETE). */
+    fun delete(path: String, body: String): String = execute(
+        Request.Builder().url(fullUrl(path)).delete(body.toRequestBody(JSON_MEDIA)).build()
+    )
+
     /** PATCH request with a JSON body, returning the response body as a String. */
     fun patch(path: String, body: String): String = execute(
         Request.Builder().url(fullUrl(path)).patch(body.toRequestBody(JSON_MEDIA)).build()

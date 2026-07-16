@@ -56,7 +56,7 @@ class PushTokenManager private constructor() {
             RegisterTokenRequest.serializer(),
             RegisterTokenRequest(
                 userPhone = userPhone,
-                fcmToken = fcmToken,
+                token = fcmToken,
                 platform = platform,
                 appBundleId = appBundleId,
             ),
@@ -71,8 +71,12 @@ class PushTokenManager private constructor() {
     suspend fun deactivateToken(fcmToken: String) {
         require(fcmToken.isNotBlank()) { "fcmToken must not be blank" }
         val api = Relavoi.requireApiClient()
-        // Query string to keep the body empty for DELETE.
-        withContext(Dispatchers.IO) { api.delete("/devices/token?fcmToken=$fcmToken") }
+        // Backend reads the token from the DELETE request body: { "token": "..." }.
+        val body = json.encodeToString(
+            DeactivateTokenRequest.serializer(),
+            DeactivateTokenRequest(token = fcmToken),
+        )
+        withContext(Dispatchers.IO) { api.delete("/devices/token", body) }
         // Drop any cache entries that pointed at this token.
         lastRegistered.entries.removeAll { it.value == fcmToken }
         Logger.d("Deactivated FCM token")
@@ -81,9 +85,14 @@ class PushTokenManager private constructor() {
     @Serializable
     private data class RegisterTokenRequest(
         val userPhone: String,
-        val fcmToken: String,
+        val token: String,
         val platform: String,
         val appBundleId: String? = null,
+    )
+
+    @Serializable
+    private data class DeactivateTokenRequest(
+        val token: String,
     )
 
     companion object {

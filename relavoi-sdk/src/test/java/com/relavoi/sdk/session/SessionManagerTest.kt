@@ -169,13 +169,18 @@ class SessionManagerTest {
               "proxyNumber":"+2349099999999",
               "state":"PENDING",
               "directionMode":"BIDIRECTIONAL",
-              "metadata":{"orderId":"ORD-1"},
-              "gracePeriodMin":15,
-              "maxDurationMin":120,
+              "metadata":{"orderId":"ORD-1","count":3,"nested":{"a":1}},
+              "gracePeriodMinutes":15,
+              "maxDurationMinutes":120,
               "recordingEnabled":false,
               "consentPrompt":"NONE",
-              "expiresAt":"2026-05-22T12:00:00Z",
-              "createdAt":"2026-05-22T10:00:00Z"
+              "expiresAt":"2026-05-22T12:00:00.000Z",
+              "createdAt":"2026-05-22T10:00:00.000Z",
+              "activatedAt":"2026-05-22T10:00:00.000Z",
+              "endedAt":null,
+              "expiredAt":null,
+              "callCount":0,
+              "lastCallAt":null
             }
         """.trimIndent()
 
@@ -187,8 +192,8 @@ class SessionManagerTest {
               "state":"GRACE_PERIOD",
               "directionMode":"BIDIRECTIONAL",
               "metadata":{},
-              "gracePeriodMin":15,
-              "maxDurationMin":120,
+              "gracePeriodMinutes":15,
+              "maxDurationMinutes":120,
               "recordingEnabled":false,
               "consentPrompt":"NONE",
               "expiresAt":"2026-05-22T12:00:00Z",

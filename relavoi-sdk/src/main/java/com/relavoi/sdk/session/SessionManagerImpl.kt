@@ -3,6 +3,7 @@ package com.relavoi.sdk.session
 import android.content.Context
 import android.content.Intent
 import android.net.Uri
+import java.net.URLEncoder
 import com.relavoi.sdk.Relavoi
 import com.relavoi.sdk.RelavoiException
 import com.relavoi.sdk.internal.Logger
@@ -111,9 +112,10 @@ class SessionManagerImpl private constructor() : SessionManager {
     override suspend fun verify(userPhone: String): VerificationResult {
         PhoneUtils.requireValidE164(userPhone, "userPhone")
         val tenantId = Relavoi.requireAuthManager().tenantId
-        // userPhone is sensitive — the backend hashes it server-side, but we URL-encode
-        // and let TLS protect the transport.
-        val encoded = Uri.encode(userPhone)
+        // Send the RAW E.164 number — the backend hashes it server-side with a
+        // per-tenant salt. URLEncoder (not android.net.Uri) so this is unit-testable
+        // on the JVM. '+' must be percent-encoded, which URLEncoder does.
+        val encoded = URLEncoder.encode(userPhone, "UTF-8")
         val path = "/sessions/verify?userPhone=$encoded&tenantId=$tenantId"
         val api = Relavoi.requireApiClient()
         val raw = withContext(Dispatchers.IO) { api.get(path) }

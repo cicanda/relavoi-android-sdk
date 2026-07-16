@@ -2,6 +2,7 @@ package com.relavoi.sdk.session
 
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
+import kotlinx.serialization.json.JsonElement
 
 /** Lifecycle states of a masking session, exactly matching the wire format. */
 @Serializable
@@ -43,15 +44,20 @@ data class Session(
     val proxyNumber: String,
     val state: SessionState,
     val directionMode: DirectionMode,
-    val metadata: Map<String, String>? = null,
-    val gracePeriodMin: Int,
-    val maxDurationMin: Int,
+    // Client-attached context. The server allows arbitrary JSON values (nested
+    // objects, numbers, arrays), so values are JsonElement rather than String.
+    val metadata: Map<String, JsonElement>? = null,
+    val gracePeriodMinutes: Int,
+    val maxDurationMinutes: Int,
     val recordingEnabled: Boolean,
     val consentPrompt: ConsentPrompt,
     val expiresAt: String,
     val createdAt: String,
     val activatedAt: String? = null,
+    val endedAt: String? = null,
+    val expiredAt: String? = null,
     val callCount: Int? = null,
+    val lastCallAt: String? = null,
 )
 
 /** Request body for `POST /sessions`. */
