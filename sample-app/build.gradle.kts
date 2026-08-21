@@ -1,3 +1,5 @@
+import java.util.Properties
+
 plugins {
     id("com.android.application")
     id("org.jetbrains.kotlin.android")
@@ -14,12 +16,22 @@ android {
         versionCode = 1
         versionName = "0.1.0"
 
-        // Sample-app dev creds — replace with real values before shipping.
+        // Credentials come from a gitignored `secrets.properties` in this module so
+        // real keys never land in git (these are public repos). Copy
+        // `secrets.properties.example` → `secrets.properties` and fill in the Bolt
+        // Nigeria test key/secret. Tenant ID and base URL are not secrets, so they
+        // default to the live values here.
         // BuildConfig fields are surfaced as `com.relavoi.sdk.sample.BuildConfig.*`.
-        buildConfigField("String", "RELAVOI_API_KEY", "\"sk_test_relavoi_dev_0123456789abcdef\"")
-        buildConfigField("String", "RELAVOI_API_SECRET", "\"secret_test_relavoi_dev_fedcba9876543210\"")
-        buildConfigField("String", "RELAVOI_TENANT_ID", "\"a1b2c3d4-e5f6-7890-abcd-ef1234567890\"")
-        buildConfigField("String", "RELAVOI_BASE_URL", "\"http://10.0.2.2:3000/v1\"") // emulator → host
+        val secretsFile = project.file("secrets.properties")
+        val secrets = Properties().apply {
+            if (secretsFile.exists()) secretsFile.inputStream().use { load(it) }
+        }
+        fun secret(key: String, default: String): String = secrets.getProperty(key) ?: default
+
+        buildConfigField("String", "RELAVOI_API_KEY", "\"${secret("RELAVOI_API_KEY", "YOUR_API_KEY")}\"")
+        buildConfigField("String", "RELAVOI_API_SECRET", "\"${secret("RELAVOI_API_SECRET", "YOUR_API_SECRET")}\"")
+        buildConfigField("String", "RELAVOI_TENANT_ID", "\"${secret("RELAVOI_TENANT_ID", "f656ac1b-3b5d-4af0-8ff1-c4cbc1076144")}\"")
+        buildConfigField("String", "RELAVOI_BASE_URL", "\"${secret("RELAVOI_BASE_URL", "https://api.relavoi.com/v1")}\"")
     }
 
     buildFeatures {
@@ -48,4 +60,11 @@ dependencies {
     implementation("androidx.constraintlayout:constraintlayout:2.1.4")
     implementation("com.google.android.material:material:1.12.0")
     implementation("androidx.lifecycle:lifecycle-runtime-ktx:2.8.4")
+
+    // Firebase Cloud Messaging — needed only for the "Register Push Token" button.
+    // Without a google-services.json (and the google-services plugin) FirebaseApp
+    // will not auto-initialize, so that one button reports an error at runtime;
+    // every other SDK feature works without Firebase. See README for setup.
+    implementation(platform("com.google.firebase:firebase-bom:33.1.2"))
+    implementation("com.google.firebase:firebase-messaging-ktx")
 }
