@@ -83,6 +83,22 @@ class SessionManagerImpl private constructor() : SessionManager {
         return session
     }
 
+    override suspend fun swapTarget(id: String, customerPhone: String): Session {
+        require(id.isNotBlank()) { "id must not be blank" }
+        PhoneUtils.requireValidE164(customerPhone, "customerPhone")
+        val api = Relavoi.requireApiClient()
+        val body = json.encodeToString(
+            SwapTargetRequest.serializer(),
+            SwapTargetRequest(customerPhone = customerPhone),
+        )
+        val raw = withContext(Dispatchers.IO) { api.patch("/sessions/$id/target", body) }
+        val session = json.decodeFromString(Session.serializer(), raw)
+        // The cached copy still names the old target.
+        cache[session.id] = session
+        Logger.d("Swapped target for session id=${session.id}")
+        return session
+    }
+
     override suspend fun end(id: String): Session {
         require(id.isNotBlank()) { "id must not be blank" }
         val api = Relavoi.requireApiClient()

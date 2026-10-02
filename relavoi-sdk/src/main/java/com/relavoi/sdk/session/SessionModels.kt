@@ -72,6 +72,12 @@ internal data class CreateSessionRequest(
     val consentPrompt: String = "NONE",
 )
 
+/** Request body for `PATCH /sessions/{id}/target`. */
+@Serializable
+internal data class SwapTargetRequest(
+    val customerPhone: String,
+)
+
 /** Paginated `GET /sessions` response. */
 @Serializable
 data class SessionListResponse(

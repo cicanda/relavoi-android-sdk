@@ -42,6 +42,21 @@ interface SessionManager {
     suspend fun get(id: String): Session
 
     /**
+     * Swap the customer (party B) on an active session, keeping the proxy number.
+     *
+     * Use this for sequential calls rather than a session per recipient: ten
+     * sessions means ten numbers and ten cooldowns, which exhausts a small pool
+     * partway through a round. The agent keeps dialling the same proxy and each
+     * call connects to whoever the current target is.
+     *
+     * The previous customer can no longer reach the proxy afterwards. Swapping
+     * to the current target is a no-op. Throws if [customerPhone] is not E.164,
+     * is the agent's own number, or already participates in another live session
+     * on the same proxy.
+     */
+    suspend fun swapTarget(id: String, customerPhone: String): Session
+
+    /**
      * End a session. The proxy enters its grace period and accepts callbacks for
      * `grace_period_min` minutes before fully expiring.
      */
