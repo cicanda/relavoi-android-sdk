@@ -1,6 +1,6 @@
 # Relavoi Android Sample App
 
-Developer test harness for the Relavoi Android SDK. Not a production UI — a column
+Developer test harness for the Relavoi Android SDK. Not a production UI: a column
 of buttons that each exercise one SDK feature against the **live backend**
 (`https://api.relavoi.com/v1`) using the **Bolt Nigeria** test tenant.
 
@@ -38,14 +38,14 @@ need filling in. The SDK derives the WebSocket URL from the base URL.
 - `READ_PHONE_STATE` is requested at launch (needed for call-state detection /
   verification).
 - `SYSTEM_ALERT_WINDOW` (overlay, for the floating verification bubble) is granted
-  from system settings — use the "Check Overlay / Phone Permission" button, which
+  from system settings. Use the "Check Overlay / Phone Permission" button, which
   opens the settings screen if it isn't granted yet.
 
 ## Firebase / push notifications (optional)
 
 The **"Register Push Token"** button calls `FirebaseMessaging.getInstance().token`
 and then `Relavoi.push.registerToken(...)`. This is the **only** feature that needs
-Firebase. Without configuration it reports an error in the log — that's expected,
+Firebase. Without configuration it reports an error in the log. That's expected,
 and every other feature works without Firebase.
 
 To make push work:

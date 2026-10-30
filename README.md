@@ -26,7 +26,7 @@ gradle wrapper --gradle-version 8.7
 
 ## Install (from a consumer app)
 
-Once published to Maven Central (see `relavoi-sdk/build.gradle.kts` — uses `maven-publish`):
+Once published to Maven Central (`relavoi-sdk/build.gradle.kts` uses `maven-publish`):
 
 ```kotlin
 // app/build.gradle.kts
@@ -94,7 +94,7 @@ sample-app/               minimal demo activity (5 buttons)
 
 ## Sample app
 
-`sample-app/` is a one-activity Android app with buttons for Create session / Verify / Set presence / End session / Init call. It uses dev credentials baked into `BuildConfig` via `app/build.gradle.kts` — swap for real values via `buildConfigField` before shipping.
+`sample-app/` is a one-activity Android app with buttons for Create session / Verify / Set presence / End session / Init call. It uses dev credentials baked into `BuildConfig` via `app/build.gradle.kts`. Swap for real values via `buildConfigField` before shipping.
 
 ## Privacy
 
@@ -112,9 +112,9 @@ and two numbers in different countries as
 
 ## Related Repositories
 
-- [relavoi-backend](https://github.com/cicanda/relavoi-backend) — API server (this SDK is a client of)
-- [relavoi-ios-sdk](https://github.com/cicanda/relavoi-ios-sdk) — iOS SDK (matching feature set)
-- [relavoi-docs](https://github.com/cicanda/relavoi-docs) — Documentation site
-- [relavoi-dashboard](https://github.com/cicanda/relavoi-dashboard) — Tenant web dashboard
-- [relavoi-admin](https://github.com/cicanda/relavoi-admin) — Operator console
-- [relavoi-infra](https://github.com/cicanda/relavoi-infra) — Terraform infrastructure
+- [relavoi-backend](https://github.com/cicanda/relavoi-backend): API server (this SDK is a client of)
+- [relavoi-ios-sdk](https://github.com/cicanda/relavoi-ios-sdk): iOS SDK (matching feature set)
+- [relavoi-docs](https://github.com/cicanda/relavoi-docs): Documentation site
+- [relavoi-dashboard](https://github.com/cicanda/relavoi-dashboard): Tenant web dashboard
+- [relavoi-admin](https://github.com/cicanda/relavoi-admin): Operator console
+- [relavoi-infra](https://github.com/cicanda/relavoi-infra): Terraform infrastructure
