@@ -7,8 +7,12 @@ import com.relavoi.sdk.Relavoi
  * Thin wrapper around [android.util.Log] gated by [com.relavoi.sdk.RelavoiConfig.enableLogging].
  * All log lines are prefixed with `Relavoi`.
  *
- * NEVER pass a plaintext phone number through this logger — use
- * [PhoneUtils.maskPhone] first.
+ * NEVER pass a phone number through this logger, or any part of one. Not the
+ * whole number, not the last four digits. Log the session id instead: it is the
+ * key that actually correlates lines, and it is not personal data.
+ *
+ * Note that [e] logs regardless of the enableLogging flag, so anything passed
+ * to it can reach a crash reporter on a user's device.
  */
 internal object Logger {
 

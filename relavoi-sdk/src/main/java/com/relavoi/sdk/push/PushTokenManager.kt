@@ -44,18 +44,20 @@ class PushTokenManager private constructor() {
         platform: String = "android",
         appBundleId: String? = null,
     ) {
-        PhoneUtils.requireValidE164(userPhone, "userPhone")
+        val canonical = PhoneUtils.requireNumberShaped(userPhone, "userPhone")
         require(fcmToken.isNotBlank()) { "fcmToken must not be blank" }
 
-        if (lastRegistered[userPhone] == fcmToken) {
-            Logger.d("Skipping push token re-registration for ${PhoneUtils.maskPhone(userPhone)}")
+        // Keyed on the canonical form: the same number written two ways must not
+        // look like two users and re-register the same token twice.
+        if (lastRegistered[canonical] == fcmToken) {
+            Logger.d("Skipping push token re-registration; token unchanged")
             return
         }
 
         val body = json.encodeToString(
             RegisterTokenRequest.serializer(),
             RegisterTokenRequest(
-                userPhone = userPhone,
+                userPhone = canonical,
                 token = fcmToken,
                 platform = platform,
                 appBundleId = appBundleId,
@@ -63,8 +65,8 @@ class PushTokenManager private constructor() {
         )
         val api = Relavoi.requireApiClient()
         withContext(Dispatchers.IO) { api.post("/devices/token", body) }
-        lastRegistered[userPhone] = fcmToken
-        Logger.d("Registered FCM token for ${PhoneUtils.maskPhone(userPhone)}")
+        lastRegistered[canonical] = fcmToken
+        Logger.d("Registered FCM token")
     }
 
     /** Deactivate a token — call on logout. */

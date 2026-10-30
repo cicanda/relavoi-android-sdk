@@ -94,7 +94,7 @@ class ApiClientTest {
     }
 
     @Test
-    fun `throws ApiError with body on 500`() {
+    fun `throws ApiError on 500 and does not surface a raw body`() {
         server.enqueue(MockResponse().setResponseCode(200).setBody("""{"accessToken":"jwt-1","expiresIn":900}"""))
         server.enqueue(MockResponse().setResponseCode(500).setBody("kaboom"))
 
@@ -103,9 +103,34 @@ class ApiClientTest {
             client.get("/ping")
             fail("expected ApiError")
         } catch (e: RelavoiException.ApiError) {
+            // The status code is kept, because it is the actionable part.
             assertEquals(500, e.statusCode)
-            assertNotNull(e.body)
-            assertTrue(e.body!!.contains("kaboom"))
+            // The body is not, and this is deliberate. A 5xx from the API is a
+            // problem document whose `detail` we read; a 5xx from anything in
+            // front of it is an error page, and an error page commonly echoes the
+            // request URI. /sessions/verify carries a subscriber's number in its
+            // query string, so echoing that body into an exception message put a
+            // phone number one crash report away from a third party.
+            assertTrue("raw body must not be surfaced", e.body == null || !e.body!!.contains("kaboom"))
+        }
+    }
+
+    @Test
+    fun `reads detail out of a problem document on 500`() {
+        server.enqueue(MockResponse().setResponseCode(200).setBody("""{"accessToken":"jwt-1","expiresIn":900}"""))
+        server.enqueue(
+            MockResponse().setResponseCode(500).setBody(
+                """{"type":"https://api.relavoi.com/errors/internal","status":500,"detail":"Something went wrong."}"""
+            )
+        )
+
+        val client = ApiClient(baseUrl(), newAuth())
+        try {
+            client.get("/ping")
+            fail("expected ApiError")
+        } catch (e: RelavoiException.ApiError) {
+            assertEquals(500, e.statusCode)
+            assertEquals("Something went wrong.", e.body)
         }
     }
 
@@ -119,5 +144,95 @@ class ApiClientTest {
         override fun load(): Pair<String, Long>? =
             token?.let { it to exp }
         override fun clear() { token = null; exp = 0L }
+    }
+
+    // ─── Typed errors from the problem document ─────────────────────────────────
+    // The server owns the number rule, so these two refusals are the SDK's only
+    // way to tell a caller "that number cannot be used" as opposed to "your
+    // request was malformed". Matching is on the slug, not the whole type URL, so
+    // it survives the hostname differing between environments.
+
+    private fun problem(slug: String, detail: String): String =
+        """{"type":"https://api.relavoi.com/errors/$slug","title":"Unprocessable Entity","status":422,"detail":"$detail"}"""
+
+    @Test
+    fun `maps number-not-supported to NumberNotSupported`() {
+        server.enqueue(MockResponse().setResponseCode(200).setBody("""{"accessToken":"j","expiresIn":900}"""))
+        server.enqueue(
+            MockResponse().setResponseCode(422)
+                .setBody(problem("number-not-supported", "Relavoi currently connects Nigerian mobile numbers only."))
+        )
+
+        val client = ApiClient(baseUrl(), newAuth())
+        try {
+            client.post("/sessions", "{}")
+            fail("expected NumberNotSupported")
+        } catch (e: RelavoiException.NumberNotSupported) {
+            assertEquals("Relavoi currently connects Nigerian mobile numbers only.", e.message)
+        }
+    }
+
+    @Test
+    fun `maps cross-border-not-supported to CrossBorderNotSupported`() {
+        server.enqueue(MockResponse().setResponseCode(200).setBody("""{"accessToken":"j","expiresIn":900}"""))
+        server.enqueue(
+            MockResponse().setResponseCode(422)
+                .setBody(problem("cross-border-not-supported", "Both people in a session must have numbers from the same country."))
+        )
+
+        val client = ApiClient(baseUrl(), newAuth())
+        try {
+            client.post("/sessions", "{}")
+            fail("expected CrossBorderNotSupported")
+        } catch (e: RelavoiException.CrossBorderNotSupported) {
+            assertTrue(e.message!!.contains("same country"))
+        }
+    }
+
+    @Test
+    fun `maps any other 422 to Validation`() {
+        server.enqueue(MockResponse().setResponseCode(200).setBody("""{"accessToken":"j","expiresIn":900}"""))
+        server.enqueue(MockResponse().setResponseCode(422).setBody(problem("validation", "agentPhone is not valid.")))
+
+        val client = ApiClient(baseUrl(), newAuth())
+        try {
+            client.post("/sessions", "{}")
+            fail("expected Validation")
+        } catch (e: RelavoiException.Validation) {
+            assertTrue(e.message!!.contains("agentPhone"))
+        }
+    }
+
+    @Test
+    fun `a 422 that is not a problem document still becomes Validation`() {
+        server.enqueue(MockResponse().setResponseCode(200).setBody("""{"accessToken":"j","expiresIn":900}"""))
+        server.enqueue(MockResponse().setResponseCode(422).setBody("<html>gateway</html>"))
+
+        val client = ApiClient(baseUrl(), newAuth())
+        try {
+            client.post("/sessions", "{}")
+            fail("expected Validation")
+        } catch (e: RelavoiException.Validation) {
+            // The raw body is not surfaced; only fields we understand are.
+            assertTrue(!e.message!!.contains("<html>"))
+        }
+    }
+
+    @Test
+    fun `the slug is matched on any host`() {
+        server.enqueue(MockResponse().setResponseCode(200).setBody("""{"accessToken":"j","expiresIn":900}"""))
+        server.enqueue(
+            MockResponse().setResponseCode(422).setBody(
+                """{"type":"https://staging.example.test/errors/number-not-supported","status":422,"detail":"nope"}"""
+            )
+        )
+
+        val client = ApiClient(baseUrl(), newAuth())
+        try {
+            client.post("/sessions", "{}")
+            fail("expected NumberNotSupported")
+        } catch (e: RelavoiException.NumberNotSupported) {
+            assertEquals("nope", e.message)
+        }
     }
 }

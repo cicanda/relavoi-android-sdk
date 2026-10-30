@@ -74,7 +74,7 @@ open class RelavoiFirebaseService : FirebaseMessagingService() {
          */
         @JvmStatic
         fun setUserForPushUpdates(context: Context, phone: String) {
-            PhoneUtils.requireValidE164(phone, "phone")
+            PhoneUtils.requireNumberShaped(phone, "phone")
             prefs(context).edit().putString(KEY_PHONE, phone).apply()
         }
 

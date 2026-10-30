@@ -40,8 +40,8 @@ class SessionManagerImpl private constructor() : SessionManager {
         recordingEnabled: Boolean,
         consentPrompt: ConsentPrompt,
     ): Session {
-        PhoneUtils.requireValidE164(agentPhone, "agentPhone")
-        PhoneUtils.requireValidE164(customerPhone, "customerPhone")
+        val agent = PhoneUtils.requireNumberShaped(agentPhone, "agentPhone")
+        val customer = PhoneUtils.requireNumberShaped(customerPhone, "customerPhone")
 
         // Server-side rule: recording on requires a non-NONE consent prompt. We validate
         // client-side too so the user gets immediate feedback instead of a 422.
@@ -54,8 +54,8 @@ class SessionManagerImpl private constructor() : SessionManager {
         val body = json.encodeToString(
             CreateSessionRequest.serializer(),
             CreateSessionRequest(
-                agentPhone = agentPhone,
-                customerPhone = customerPhone,
+                agentPhone = agent,
+                customerPhone = customer,
                 metadata = metadata,
                 gracePeriodMinutes = gracePeriodMinutes,
                 directionMode = directionMode.name,
@@ -68,7 +68,7 @@ class SessionManagerImpl private constructor() : SessionManager {
         val session = json.decodeFromString(Session.serializer(), raw)
         cache[session.id] = session
         Logger.d(
-            "Created session id=${session.id} proxy=${PhoneUtils.maskPhone(session.proxyNumber)}"
+            "Created session id=${session.id}"
         )
         return session
     }
@@ -85,11 +85,11 @@ class SessionManagerImpl private constructor() : SessionManager {
 
     override suspend fun swapTarget(id: String, customerPhone: String): Session {
         require(id.isNotBlank()) { "id must not be blank" }
-        PhoneUtils.requireValidE164(customerPhone, "customerPhone")
+        val customer = PhoneUtils.requireNumberShaped(customerPhone, "customerPhone")
         val api = Relavoi.requireApiClient()
         val body = json.encodeToString(
             SwapTargetRequest.serializer(),
-            SwapTargetRequest(customerPhone = customerPhone),
+            SwapTargetRequest(customerPhone = customer),
         )
         val raw = withContext(Dispatchers.IO) { api.patch("/sessions/$id/target", body) }
         val session = json.decodeFromString(Session.serializer(), raw)
@@ -126,12 +126,17 @@ class SessionManagerImpl private constructor() : SessionManager {
     }
 
     override suspend fun verify(userPhone: String): VerificationResult {
-        PhoneUtils.requireValidE164(userPhone, "userPhone")
+        val canonical = PhoneUtils.requireNumberShaped(userPhone, "userPhone")
         val tenantId = Relavoi.requireAuthManager().tenantId
-        // Send the RAW E.164 number — the backend hashes it server-side with a
-        // per-tenant salt. URLEncoder (not android.net.Uri) so this is unit-testable
-        // on the JVM. '+' must be percent-encoded, which URLEncoder does.
-        val encoded = URLEncoder.encode(userPhone, "UTF-8")
+        // Send the number as the caller gave it, minus separators — the backend
+        // normalises it and hashes it server-side with a per-tenant salt, so a
+        // client-side hash could never match. URLEncoder (not android.net.Uri) so
+        // this is unit-testable on the JVM. '+' must be percent-encoded, which
+        // URLEncoder does.
+        //
+        // This number is in the query string, which is why ApiClient logs the
+        // path without it.
+        val encoded = URLEncoder.encode(canonical, "UTF-8")
         val path = "/sessions/verify?userPhone=$encoded&tenantId=$tenantId"
         val api = Relavoi.requireApiClient()
         val raw = withContext(Dispatchers.IO) { api.get(path) }
@@ -146,7 +151,9 @@ class SessionManagerImpl private constructor() : SessionManager {
             )
         val intent = Intent(Intent.ACTION_DIAL, Uri.parse("tel:${session.proxyNumber}"))
             .addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
-        Logger.d("Dialing proxy ${PhoneUtils.maskPhone(session.proxyNumber)} for session $sessionId")
+        // The session id is the correlation key here. The proxy number used to be
+        // logged masked to its last four digits, which is still part of a number.
+        Logger.d("Dialing proxy for session $sessionId")
         context.startActivity(intent)
     }
 

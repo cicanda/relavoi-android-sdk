@@ -98,7 +98,17 @@ sample-app/               minimal demo activity (5 buttons)
 
 ## Privacy
 
-Phone numbers are **never logged in plaintext**. Every log site that touches a phone number routes through `PhoneUtils.maskPhone()` (returns `+****1234`). E.164 validation rejects non-conforming inputs at the SDK boundary.
+Phone numbers are **never logged, in any form**. Not in full, and not masked to
+the last four digits: no log line, exception message or crash report carries any
+part of a number. Log lines use the session id instead, which is the key that
+actually correlates them.
+
+Validation at the SDK boundary is deliberately light: non-empty, digits, with an
+optional leading plus. The server owns the real rule and reads it from its
+countries table, so it can change without a new SDK release. A number the
+platform does not support comes back as `RelavoiException.NumberNotSupported`,
+and two numbers in different countries as
+`RelavoiException.CrossBorderNotSupported`.
 
 ## Related Repositories
 

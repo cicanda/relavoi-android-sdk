@@ -23,14 +23,41 @@ sealed class RelavoiException(message: String, cause: Throwable? = null) : Excep
     class Network(cause: Throwable) : RelavoiException("Network error: ${cause.message}", cause)
 
     /**
-     * The server returned a non-2xx HTTP status. [statusCode] is the raw HTTP code and
-     * [body] is the raw response body (may be JSON Problem Details per RFC 7807).
+     * The server returned a non-2xx HTTP status that has no more specific type.
+     *
+     * [statusCode] is the raw HTTP code. [body] is the `detail` of the RFC 7807
+     * problem document, or null when the response was not one. It is not the raw
+     * response body: an error page from in front of the API commonly echoes the
+     * request URI, and one of ours carries a phone number in its query string.
      */
     class ApiError(val statusCode: Int, val body: String?) :
-        RelavoiException("API error: $statusCode — ${body ?: "<no body>"}")
+        RelavoiException("API error $statusCode. ${body ?: "No further detail."}")
 
-    /** Client-side validation failed (e.g. malformed phone number). */
+    /** Client-side validation failed (e.g. a field that is not number-shaped). */
     class Validation(detail: String) : RelavoiException("Validation: $detail")
+
+    /**
+     * The API refused a phone number because Relavoi does not currently connect
+     * numbers of that kind. Today that means anything other than a Nigerian
+     * mobile number.
+     *
+     * This is a server decision, not a client one: the supported countries live
+     * in the platform's countries table and can change without a new SDK
+     * release, so do not try to pre-empt it with a local check. Show [message]
+     * to the user, or your own wording for it.
+     *
+     * [message] never contains the number that was refused.
+     */
+    class NumberNotSupported(detail: String) : RelavoiException(detail)
+
+    /**
+     * The API refused the session because the two numbers are not in the same
+     * country. Both parties must be in one country, and cross-border masking is
+     * a separate product that is not enabled.
+     *
+     * [message] never contains either number.
+     */
+    class CrossBorderNotSupported(detail: String) : RelavoiException(detail)
 
     /**
      * The server returned 429 Too Many Requests. [retryAfterSec] is parsed from the

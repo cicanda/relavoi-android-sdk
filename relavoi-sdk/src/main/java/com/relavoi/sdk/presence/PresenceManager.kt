@@ -44,8 +44,9 @@ class PresenceManager private constructor() : DefaultLifecycleObserver {
      * disabled. Call again with a new value on user switch.
      */
     fun setUserPhone(phone: String) {
-        PhoneUtils.requireValidE164(phone, "phone")
-        userPhone = phone
+        // Store the canonical form, so a caller who passes "0803 123 4567" once
+        // and "08031234567" the next time is the same user to this class.
+        userPhone = PhoneUtils.requireNumberShaped(phone, "phone")
     }
 
     override fun onStart(owner: LifecycleOwner) {
@@ -79,7 +80,7 @@ class PresenceManager private constructor() : DefaultLifecycleObserver {
         )
         val api = Relavoi.requireApiClient()
         api.post("/devices/presence", body)
-        Logger.d("Presence → $status for ${PhoneUtils.maskPhone(phone)}")
+        Logger.d("Presence → $status")
     }
 
     @Serializable
