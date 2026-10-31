@@ -112,9 +112,9 @@ and two numbers in different countries as
 
 ## Related Repositories
 
-- [relavoi-backend](https://github.com/cicanda/relavoi-backend): API server (this SDK is a client of)
+- relavoi-backend (private): API server (this SDK is a client of)
 - [relavoi-ios-sdk](https://github.com/cicanda/relavoi-ios-sdk): iOS SDK (matching feature set)
 - [relavoi-docs](https://github.com/cicanda/relavoi-docs): Documentation site
-- [relavoi-dashboard](https://github.com/cicanda/relavoi-dashboard): Tenant web dashboard
-- [relavoi-admin](https://github.com/cicanda/relavoi-admin): Operator console
-- [relavoi-infra](https://github.com/cicanda/relavoi-infra): Terraform infrastructure
+- relavoi-dashboard (private): Tenant web dashboard
+- relavoi-admin (private): Operator console
+- relavoi-infra (private): Terraform infrastructure
