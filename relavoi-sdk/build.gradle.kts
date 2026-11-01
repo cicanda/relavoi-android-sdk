@@ -78,7 +78,7 @@ publishing {
             pom {
                 name.set("Relavoi Android SDK")
                 description.set("Phone-number masking SDK for Android")
-                url.set("https://github.com/relavoi/relavoi-android-sdk")
+                url.set("https://github.com/cicanda/relavoi-android-sdk")
                 licenses {
                     license {
                         name.set("Apache-2.0")

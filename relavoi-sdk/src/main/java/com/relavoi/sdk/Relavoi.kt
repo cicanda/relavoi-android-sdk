@@ -2,6 +2,8 @@ package com.relavoi.sdk
 
 import android.content.Context
 import com.relavoi.sdk.auth.AuthManager
+import com.relavoi.sdk.auth.RelavoiTokenProvider
+import com.relavoi.sdk.auth.TokenSource
 import com.relavoi.sdk.auth.TokenStore
 import com.relavoi.sdk.events.EventStreamManager
 import com.relavoi.sdk.events.EventStreamManagerImpl
@@ -69,6 +71,12 @@ object Relavoi {
      */
     @JvmStatic
     @JvmOverloads
+    @Deprecated(
+        message =
+            "Ship a token provider instead. A secret compiled into an APK can be read back " +
+                "out of it with unzip and strings.",
+        replaceWith = ReplaceWith("Relavoi.initialize(context, tenantId, tokenProvider, config)"),
+    )
     fun initialize(
         context: Context,
         apiKey: String,
@@ -78,6 +86,70 @@ object Relavoi {
     ) {
         require(apiKey.isNotBlank()) { "apiKey must not be blank" }
         require(apiSecret.isNotBlank()) { "apiSecret must not be blank" }
+
+        // A sandbox key in a shipped app is a nuisance; a live one is a
+        // credential anybody with the APK can take. Say so at runtime, because
+        // a deprecation warning is easy to silence and this is worth reading
+        // twice.
+        if (apiKey.startsWith("rk_live_")) {
+            Logger.w(
+                "Relavoi: a LIVE API secret is compiled into this app. It can be extracted " +
+                    "from the APK, and it can create sessions billed to you and read every " +
+                    "session on your workspace. Move to the tokenProvider form of initialize().",
+            )
+        }
+
+        start(context, tenantId, config) { tokenStore ->
+            AuthManager(
+                source = TokenSource.Credentials(apiKey, apiSecret),
+                tenantId = tenantId,
+                tokenStore = tokenStore,
+                baseUrl = config.baseUrl,
+                enableLogging = config.enableLogging,
+            )
+        }
+    }
+
+    /**
+     * Initialize with a token provider. Use this one.
+     *
+     * Your app supplies a function that asks your own backend for a token; the
+     * backend holds the API secret and calls `POST /v1/auth/sdk-token`. The
+     * secret never reaches the handset.
+     *
+     * @param context The host application context. The SDK only retains the
+     *  application context, never an Activity, so this cannot leak.
+     * @param tenantId Tenant UUID. Required.
+     * @param tokenProvider Asked for a token on first use, shortly before the
+     *  current one expires, and once after a 401.
+     * @param config Optional SDK configuration. Defaults to production endpoints.
+     */
+    @JvmStatic
+    @JvmOverloads
+    fun initialize(
+        context: Context,
+        tenantId: String,
+        tokenProvider: RelavoiTokenProvider,
+        config: RelavoiConfig = RelavoiConfig(),
+    ) {
+        start(context, tenantId, config) { tokenStore ->
+            AuthManager(
+                source = TokenSource.Provider(tokenProvider),
+                tenantId = tenantId,
+                tokenStore = tokenStore,
+                baseUrl = config.baseUrl,
+                enableLogging = config.enableLogging,
+            )
+        }
+    }
+
+    /** The half both initializers share. */
+    private fun start(
+        context: Context,
+        tenantId: String,
+        config: RelavoiConfig,
+        makeAuth: (TokenStore) -> AuthManager,
+    ) {
         require(tenantId.isNotBlank()) { "tenantId must not be blank" }
 
         synchronized(this) {
@@ -89,14 +161,7 @@ object Relavoi {
             this.config = config
 
             val tokenStore = TokenStore(appCtx)
-            val auth = AuthManager(
-                apiKey = apiKey,
-                apiSecret = apiSecret,
-                tenantId = tenantId,
-                tokenStore = tokenStore,
-                baseUrl = config.baseUrl,
-                enableLogging = config.enableLogging,
-            )
+            val auth = makeAuth(tokenStore)
             this.authManager = auth
             this.apiClient = ApiClient(
                 baseUrl = config.baseUrl,

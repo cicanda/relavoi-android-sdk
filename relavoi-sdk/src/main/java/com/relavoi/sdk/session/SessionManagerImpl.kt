@@ -37,19 +37,12 @@ class SessionManagerImpl private constructor() : SessionManager {
         metadata: Map<String, String>?,
         gracePeriodMinutes: Int,
         directionMode: DirectionMode,
-        recordingEnabled: Boolean,
-        consentPrompt: ConsentPrompt,
     ): Session {
         val agent = PhoneUtils.requireNumberShaped(agentPhone, "agentPhone")
         val customer = PhoneUtils.requireNumberShaped(customerPhone, "customerPhone")
 
         // Server-side rule: recording on requires a non-NONE consent prompt. We validate
         // client-side too so the user gets immediate feedback instead of a 422.
-        if (recordingEnabled && consentPrompt == ConsentPrompt.NONE) {
-            throw RelavoiException.Validation(
-                "consentPrompt cannot be NONE when recordingEnabled=true"
-            )
-        }
 
         val body = json.encodeToString(
             CreateSessionRequest.serializer(),
@@ -59,8 +52,6 @@ class SessionManagerImpl private constructor() : SessionManager {
                 metadata = metadata,
                 gracePeriodMinutes = gracePeriodMinutes,
                 directionMode = directionMode.name,
-                recordingEnabled = recordingEnabled,
-                consentPrompt = consentPrompt.name,
             ),
         )
         val api = Relavoi.requireApiClient()

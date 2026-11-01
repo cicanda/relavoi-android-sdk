@@ -26,24 +26,44 @@ gradle wrapper --gradle-version 8.7
 
 ## Install (from a consumer app)
 
-Once published to Maven Central (`relavoi-sdk/build.gradle.kts` uses `maven-publish`):
+JitPack builds this repository at a tag. That is the interim distribution until
+the SDK is on Maven Central.
 
 ```kotlin
+// settings.gradle.kts
+dependencyResolutionManagement {
+  repositories {
+    // Required, not optional: this SDK depends on firebase-bom, which only
+    // Google's repository serves. Without it the POM fails to parse.
+    google()
+    mavenCentral()
+    maven("https://jitpack.io")
+  }
+}
+
 // app/build.gradle.kts
 dependencies {
-  implementation("com.relavoi:sdk:0.1.0")
+  implementation("com.github.cicanda:relavoi-android-sdk:v0.3.0")
 }
 ```
 
 ## Quick start
 
+### Where the token comes from
+
+Your backend holds the API key and secret and calls `POST /v1/auth/sdk-token`
+for one user; the app asks your backend and hands the result to the SDK. The
+secret never reaches the handset, because anything compiled into a published
+app can be read back out of it, and a live key and secret let anyone create
+sessions billed to you and list every session and call on your workspace.
+
 ```kotlin
 // Application.onCreate()
 Relavoi.initialize(
   context = applicationContext,
-  apiKey = BuildConfig.RELAVOI_API_KEY,
-  apiSecret = BuildConfig.RELAVOI_API_SECRET,
   tenantId = BuildConfig.RELAVOI_TENANT_ID,
+  // Ask YOUR backend, which holds the API secret.
+  tokenProvider = { myBackend.relavoiToken() },
   config = RelavoiConfig(enableLogging = true),
 )
 

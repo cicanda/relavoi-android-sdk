@@ -60,7 +60,14 @@ data class Session(
     val lastCallAt: String? = null,
 )
 
-/** Request body for `POST /sessions`. */
+/**
+ * Request body for `POST /sessions`.
+ *
+ * No recording fields: the API refuses `recordingEnabled: true` with
+ * `feature-not-available`, so sending `false` on every request said nothing
+ * and omitting it says the same. Both fields are still on [Session], because
+ * the API still returns them.
+ */
 @Serializable
 internal data class CreateSessionRequest(
     val agentPhone: String,
@@ -68,8 +75,6 @@ internal data class CreateSessionRequest(
     val metadata: Map<String, String>? = null,
     val gracePeriodMinutes: Int = 15,
     val directionMode: String = "BIDIRECTIONAL",
-    val recordingEnabled: Boolean = false,
-    val consentPrompt: String = "NONE",
 )
 
 /** Request body for `PATCH /sessions/{id}/target`. */

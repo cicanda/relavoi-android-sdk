@@ -23,10 +23,6 @@ interface SessionManager {
      * @param gracePeriodMinutes Minutes after [end] is called during which the proxy
      *  still routes calls. Default 15.
      * @param directionMode Which direction(s) the proxy permits. Default bidirectional.
-     * @param recordingEnabled Whether call recording is active for this session.
-     * @param consentPrompt How recording consent is announced. If [recordingEnabled] is
-     *  true, this MUST NOT be `NONE` (the server enforces this).
-     * @return The created [Session] in `PENDING` state.
      */
     suspend fun create(
         agentPhone: String,
@@ -34,8 +30,6 @@ interface SessionManager {
         metadata: Map<String, String>? = null,
         gracePeriodMinutes: Int = 15,
         directionMode: DirectionMode = DirectionMode.BIDIRECTIONAL,
-        recordingEnabled: Boolean = false,
-        consentPrompt: ConsentPrompt = ConsentPrompt.NONE,
     ): Session
 
     /** Fetch the current state of a session by id. Hits the local cache first. */

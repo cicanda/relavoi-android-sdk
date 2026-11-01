@@ -25,14 +25,42 @@ import java.util.concurrent.TimeUnit
  * Concurrent refreshes are serialized via [refreshMutex] so a burst of API calls causes
  * exactly one network round-trip.
  */
+/**
+ * Where tokens come from.
+ *
+ * [Provider] is the one to use in a shipped app: the secret stays on your
+ * backend. [Credentials] is the original form, kept working for local
+ * development and for integrations that have not moved yet.
+ */
+internal sealed interface TokenSource {
+    data class Credentials(val apiKey: String, val apiSecret: String) : TokenSource
+    data class Provider(val provider: RelavoiTokenProvider) : TokenSource
+}
+
 internal class AuthManager(
-    private val apiKey: String,
-    private val apiSecret: String,
+    private val source: TokenSource,
     val tenantId: String,
     private val tokenStore: TokenStore,
     baseUrl: String,
     private val enableLogging: Boolean = false,
 ) {
+
+    /** Source-compatible with the deprecated key and secret initializer. */
+    constructor(
+        apiKey: String,
+        apiSecret: String,
+        tenantId: String,
+        tokenStore: TokenStore,
+        baseUrl: String,
+        enableLogging: Boolean = false,
+    ) : this(
+        TokenSource.Credentials(apiKey, apiSecret),
+        tenantId,
+        tokenStore,
+        baseUrl,
+        enableLogging,
+    )
+
 
     private val authBaseUrl: String = baseUrl.trimEnd('/')
     private val json = Json { ignoreUnknownKeys = true; encodeDefaults = true }
@@ -97,9 +125,29 @@ internal class AuthManager(
             return@withLock tok
         }
 
+        // A provider token comes from the host app, so there is no request to
+        // build and nothing to persist: it is already short-lived and the
+        // provider can always produce another. Persisting one would let a
+        // token outlive a sign-out in the host app.
+        val provider = source
+        if (provider is TokenSource.Provider) {
+            val token = provider.provider.fetchToken()
+            require(token.accessToken.isNotBlank()) { "token provider returned a blank accessToken" }
+            val expiresAt = System.currentTimeMillis() + token.expiresInSeconds.coerceAtLeast(0) * 1000L
+            cachedToken = token.accessToken
+            cachedExpiresAt = expiresAt
+            Logger.d("AuthManager took a token from the provider; expires in ${token.expiresInSeconds}s")
+            return@withLock token.accessToken
+        }
+
+        val credentials = source as TokenSource.Credentials
         val body = json.encodeToString(
             TokenRequest.serializer(),
-            TokenRequest(apiKey = apiKey, apiSecret = apiSecret, tenantId = tenantId),
+            TokenRequest(
+                apiKey = credentials.apiKey,
+                apiSecret = credentials.apiSecret,
+                tenantId = tenantId,
+            ),
         )
         val request = Request.Builder()
             .url("$authBaseUrl/auth/token")
