@@ -138,3 +138,9 @@ and two numbers in different countries as
 - [relavoi-dashboard](https://github.com/cicanda/relavoi-dashboard): Tenant web dashboard
 - [relavoi-admin](https://github.com/cicanda/relavoi-admin): Operator console
 - relavoi-infra (private): Terraform infrastructure
+
+## License
+
+Apache License 2.0. See [LICENSE](./LICENSE).
+
+Copyright 2026 CICANDA Ltd.

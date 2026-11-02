@@ -1,3 +1,17 @@
+## 0.3.1
+
+### Apache License 2.0
+
+This repository is public and is what integrators read, and it shipped without
+a licence. Nobody could use it: no licence means all rights reserved, so a
+company's legal review would have stopped an integration whatever the README
+promised. The published POM has claimed `Apache-2.0`
+since the first release, with no file in the repository to back the claim; now
+the two agree.
+
+The licence is Apache 2.0, the full text is in `LICENSE`, and the README says
+so. Nothing about the code or the API has changed in this release.
+
 ## 0.2.0
 
 ### Phone numbers: the server decides, not the SDK
