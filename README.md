@@ -29,7 +29,7 @@ gradle wrapper --gradle-version 8.7
 JitPack builds this repository at a tag. That is the interim distribution until
 the SDK is on Maven Central.
 
-```kotlin
+```kotlin manifest
 // settings.gradle.kts
 dependencyResolutionManagement {
   repositories {
@@ -57,7 +57,7 @@ secret never reaches the handset, because anything compiled into a published
 app can be read back out of it, and a live key and secret let anyone create
 sessions billed to you and list every session and call on your workspace.
 
-```kotlin
+```kotlin fragment
 // Application.onCreate()
 Relavoi.initialize(
   context = applicationContext,

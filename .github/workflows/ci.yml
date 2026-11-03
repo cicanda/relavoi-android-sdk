@@ -34,3 +34,18 @@ jobs:
 
       - name: Build sample app (debug)
         run: ./gradlew :sample-app:assembleDebug
+
+      - name: README kotlin samples compile
+        # Every ```kotlin fence in the README is compiled against this working
+        # tree, in the doc-samples module. A sample an integrator could not
+        # compile fails the build.
+        #
+        # The fence annotations are what make this possible: a reference
+        # listing and a two-line snippet cannot be compiled the same way as a
+        # whole file. They are documented in scripts/doc-samples/README.md.
+        #
+        # The docs site's Android pages hold most of the samples and are not in
+        # this repository. relavoi-docs runs this same script over them on a
+        # schedule, with this SDK checked out at its released tag, because that
+        # is the version a reader of the docs is using.
+        run: python3 scripts/check-doc-samples.py README.md
