@@ -35,3 +35,15 @@ newest.
 ### swiftlint equivalent
 
 Tracked in the iOS SDK's own BACKLOG.md. Same gap, same reasoning.
+
+## No release-version check
+
+The iOS and Flutter SDKs both have `scripts/check-release-version.sh`, run by
+CI on a tag push, which fails the release if the tree disagrees with the tag.
+They have it because v0.3.2 of the iOS SDK was tagged with a README still
+installing 0.3.1, the release whose `create()` crashed, and force-moving a
+published tag made SwiftPM refuse to resolve it.
+
+This repository has the same two places to drift, `RELAVOI_VERSION` in
+gradle.properties and the install snippet in the README, and nothing that
+checks them. 0.4.0 was bumped by hand.

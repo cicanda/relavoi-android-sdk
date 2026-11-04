@@ -29,8 +29,15 @@ import java.util.concurrent.TimeUnit
  *  | 400/422 | cross-border-not-supported   | [RelavoiException.CrossBorderNotSupported]  |
  *  | 400/422 | anything else                | [RelavoiException.Validation]               |
  *  | 401     |                              | [RelavoiException.Unauthorized]             |
+ *  | any     | number-quota-reached         | [RelavoiException.NumberQuotaReached]       |
  *  | 429     |                              | [RelavoiException.RateLimited]              |
  *  | other   |                              | [RelavoiException.ApiError]                 |
+ *
+ * The quota refusal is matched on its slug at any status, deliberately. It was
+ * answered with a 429 and is now a 409, and it must not be read as a rate
+ * limit under either: a rate limit says wait, and this one does not clear by
+ * waiting. Keying on the status would have mislabelled it for as long as the
+ * two sides were out of step, which is the window every release creates.
  *
  * IO failures surface as [RelavoiException.Network].
  *
@@ -124,6 +131,13 @@ internal class ApiClient(
     private fun translate(code: Int, body: String?, retryAfter: String?): RelavoiException {
         val problem = parseProblem(body)
         val detail = problem?.detail
+
+        // Before the status is looked at. See the table above.
+        if (problem?.slug == "number-quota-reached") {
+            return RelavoiException.NumberQuotaReached(
+                detail ?: "This workspace is holding every proxy number its plan allows at once."
+            )
+        }
 
         return when (code) {
             401 -> RelavoiException.Unauthorized(detail ?: "no detail")

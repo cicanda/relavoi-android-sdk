@@ -60,6 +60,26 @@ sealed class RelavoiException(message: String, cause: Throwable? = null) : Excep
     class CrossBorderNotSupported(detail: String) : RelavoiException(detail)
 
     /**
+     * The workspace is holding every proxy number its plan allows it to hold at
+     * once, and each of them is already in a live session with one of the two
+     * people in this request.
+     *
+     * **Do not retry this on a timer.** It is not a rate limit, which is why it
+     * is a type of its own rather than [RateLimited]: no interval makes it
+     * clear. It clears when one of the workspace's sessions ends, or when a
+     * request for more numbers is approved, which is a change of state. The API
+     * sends no Retry-After with it.
+     *
+     * A proxy number carries many sessions at once but never the same person
+     * twice, so this is the point at which another number is genuinely needed.
+     * If an app hits this often, the workspace should ask for a higher limit
+     * from the Numbers page in its dashboard.
+     *
+     * [message] never contains either number.
+     */
+    class NumberQuotaReached(detail: String) : RelavoiException(detail)
+
+    /**
      * The server returned 429 Too Many Requests. [retryAfterSec] is parsed from the
      * Retry-After header when present.
      */

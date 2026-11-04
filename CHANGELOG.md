@@ -1,3 +1,40 @@
+## 0.4.0
+
+### `NumberQuotaReached`, and why this is a minor and not a patch
+
+The API refuses a session when the workspace is holding every proxy number its
+plan allows at once and each of them is already in a live session with one of
+the two people being connected. That refusal used to arrive as a `429` and be
+surfaced here as `RateLimited`, which was wrong in the way that matters: a
+caller handling a rate limit waits and retries, and this condition does not
+clear by waiting. It clears when one of the workspace's sessions ends, or when
+a request for more numbers is approved.
+
+So it is now `RelavoiException.NumberQuotaReached`, and the API answers it with
+a `409`.
+
+**This is a source-breaking change**, which is why it is 0.4.0.
+`RelavoiException` is a sealed class, so an exhaustive `when` over it stops
+compiling when a subclass is added. The error-handling sample in our own docs
+is written that way, with no `else`, so an app that copied it will not build
+until it handles the new type. Adding one branch is the whole migration:
+
+```kotlin
+is RelavoiException.NumberQuotaReached -> showAtNumberLimit(e.message)
+```
+
+Nothing else changes. If your `when` already has an `else`, there is nothing to
+do at all.
+
+### The slug decides, not the status
+
+`ApiClient` matches the problem document's `type` slug before it looks at the
+status code, so `number-quota-reached` maps to the new type whether it arrives
+as a `409` or as the `429` an older deployment sends. An SDK that keyed on the
+status would have called it a rate limit for as long as the two sides were out
+of step, which is exactly the window a release creates. There are tests for
+both statuses, and one that a plain `429` is still `RateLimited`.
+
 ## 0.3.1
 
 ### Apache License 2.0

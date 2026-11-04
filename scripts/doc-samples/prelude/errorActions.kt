@@ -5,3 +5,11 @@ fun retryAfter(seconds: Long?) { }
 fun showOffline() { }
 fun showUnsupportedNumber(message: String?) { }
 fun showSameCountryOnly(message: String?) { }
+
+/**
+ * Shown when the workspace is at its proxy number limit. Not a retry: the
+ * condition clears when a session ends or when more numbers are approved.
+ */
+fun showAtNumberLimit(detail: String?) {
+    println(detail ?: "At the number limit.")
+}

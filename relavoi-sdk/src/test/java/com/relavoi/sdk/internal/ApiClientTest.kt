@@ -190,6 +190,62 @@ class ApiClientTest {
     }
 
     @Test
+    fun `maps number-quota-reached to NumberQuotaReached on 409`() {
+        server.enqueue(MockResponse().setResponseCode(200).setBody("""{"accessToken":"j","expiresIn":900}"""))
+        server.enqueue(
+            MockResponse().setResponseCode(409)
+                .setBody(problem("number-quota-reached", "This workspace is holding all 1 of its 1 proxy numbers."))
+        )
+
+        val client = ApiClient(baseUrl(), newAuth())
+        try {
+            client.post("/sessions", "{}")
+            fail("expected NumberQuotaReached")
+        } catch (e: RelavoiException.NumberQuotaReached) {
+            assertTrue(e.message!!.contains("proxy numbers"))
+        }
+    }
+
+    @Test
+    fun `number-quota-reached is not a rate limit even on 429`() {
+        // It was answered with a 429 before the status was changed to 409. An
+        // SDK keyed on the status would have called it a rate limit, and a
+        // caller handling RateLimited retries. The slug decides, so an old
+        // backend and a new one both read correctly.
+        server.enqueue(MockResponse().setResponseCode(200).setBody("""{"accessToken":"j","expiresIn":900}"""))
+        server.enqueue(
+            MockResponse().setResponseCode(429)
+                .setBody(problem("number-quota-reached", "At the limit."))
+        )
+
+        val client = ApiClient(baseUrl(), newAuth())
+        try {
+            client.post("/sessions", "{}")
+            fail("expected NumberQuotaReached, not RateLimited")
+        } catch (e: RelavoiException.NumberQuotaReached) {
+            assertEquals("At the limit.", e.message)
+        }
+    }
+
+    @Test
+    fun `a plain 429 is still a rate limit`() {
+        server.enqueue(MockResponse().setResponseCode(200).setBody("""{"accessToken":"j","expiresIn":900}"""))
+        server.enqueue(
+            MockResponse().setResponseCode(429)
+                .setHeader("Retry-After", "12")
+                .setBody(problem("rate-limit", "Slow down."))
+        )
+
+        val client = ApiClient(baseUrl(), newAuth())
+        try {
+            client.post("/sessions", "{}")
+            fail("expected RateLimited")
+        } catch (e: RelavoiException.RateLimited) {
+            assertEquals(12L, e.retryAfterSec)
+        }
+    }
+
+    @Test
     fun `maps any other 422 to Validation`() {
         server.enqueue(MockResponse().setResponseCode(200).setBody("""{"accessToken":"j","expiresIn":900}"""))
         server.enqueue(MockResponse().setResponseCode(422).setBody(problem("validation", "agentPhone is not valid.")))

@@ -43,7 +43,7 @@ dependencyResolutionManagement {
 
 // app/build.gradle.kts
 dependencies {
-  implementation("com.github.cicanda:relavoi-android-sdk:v0.3.1")
+  implementation("com.github.cicanda:relavoi-android-sdk:v0.4.0")
 }
 ```
 
