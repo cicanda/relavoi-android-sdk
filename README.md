@@ -70,8 +70,8 @@ Relavoi.initialize(
 // Then anywhere
 lifecycleScope.launch {
   val session = Relavoi.sessions.create(
-    agentPhone = "+2348011111111",
-    customerPhone = "+2348022222222",
+    agentPhone = "+2349000000001",
+    customerPhone = "+2349000000002",
     gracePeriodMinutes = 15,
   )
   Log.d("MyApp", "proxy=${session.proxyNumber}")

@@ -44,8 +44,8 @@ class PresenceManager private constructor() : DefaultLifecycleObserver {
      * disabled. Call again with a new value on user switch.
      */
     fun setUserPhone(phone: String) {
-        // Store the canonical form, so a caller who passes "0803 123 4567" once
-        // and "08031234567" the next time is the same user to this class.
+        // Store the canonical form, so a caller who passes "0900 000 0001" once
+        // and "09000000001" the next time is the same user to this class.
         userPhone = PhoneUtils.requireNumberShaped(phone, "phone")
     }
 

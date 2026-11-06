@@ -30,8 +30,8 @@ need filling in. The SDK derives the WebSocket URL from the base URL.
 
 ## Test numbers (pre-filled in the UI)
 
-- Agent phone: `+2347067379297`
-- Customer phone: `+2348162662319`
+- Agent phone: `+2349000000001`
+- Customer phone: `+2349000000002`
 
 ## Permissions
 

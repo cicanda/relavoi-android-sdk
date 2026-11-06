@@ -41,9 +41,9 @@ import java.util.Locale
 class MainActivity : AppCompatActivity() {
 
     // Dev fixtures — Nigerian E.164 test numbers.
-    private val defaultAgentPhone = "+2347067379297"
-    private val defaultCustomerPhone = "+2348162662319"
-    private val defaultUserPhone = "+2347067379297"
+    private val defaultAgentPhone = "+2349000000001"
+    private val defaultCustomerPhone = "+2349000000002"
+    private val defaultUserPhone = "+2349000000001"
 
     private var currentSessionId: String? = null
 
