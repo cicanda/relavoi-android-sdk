@@ -134,9 +134,9 @@ and two numbers in different countries as
 
 - relavoi-backend (private): API server (this SDK is a client of)
 - [relavoi-ios-sdk](https://github.com/cicanda/relavoi-ios-sdk): iOS SDK (matching feature set)
-- [relavoi-docs](https://github.com/cicanda/relavoi-docs): Documentation site
-- [relavoi-dashboard](https://github.com/cicanda/relavoi-dashboard): Tenant web dashboard
-- [relavoi-admin](https://github.com/cicanda/relavoi-admin): Operator console
+- relavoi-docs (private): source of [docs.relavoi.com](https://docs.relavoi.com)
+- relavoi-dashboard (private): tenant web dashboard
+- relavoi-admin (private): operator console
 - relavoi-infra (private): Terraform infrastructure
 
 ## License
