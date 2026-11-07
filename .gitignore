@@ -22,3 +22,12 @@ secrets.properties
 
 # Kotlin
 .kotlin/
+
+# Working rules for the agent. This repo is public; these are not.
+# The copy that counts lives in relavoi-infra/agent/relavoi-android-sdk/ and is restored
+# here by relavoi-infra/scripts/sync-agent-docs.sh. Ignored so that a file
+# left on disk can never be committed back into a public history.
+CLAUDE.md
+AGENTS.md
+BACKLOG.md
+docs/backlog.md
