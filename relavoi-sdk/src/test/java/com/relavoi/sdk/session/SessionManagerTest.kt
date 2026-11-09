@@ -57,11 +57,11 @@ class SessionManagerTest {
         server.enqueue(MockResponse().setResponseCode(200).setBody(SAMPLE_SESSION))
 
         val session = SessionManagerImpl.instance.create(
-            agentPhone = "+2348011111111",
-            customerPhone = "+2348022222222",
+            agentPhone = "+2349000000001",
+            customerPhone = "+2349000000002",
         )
         assertEquals("sess-1", session.id)
-        assertEquals("+2349099999999", session.proxyNumber)
+        assertEquals("+2349000000100", session.proxyNumber)
         assertEquals(SessionState.PENDING, session.state)
 
         // Cache populated.
@@ -73,7 +73,7 @@ class SessionManagerTest {
         try {
             SessionManagerImpl.instance.create(
                 agentPhone = "not-a-phone-1234",
-                customerPhone = "+2348022222222",
+                customerPhone = "+2349000000002",
             )
             fail("expected Validation")
         } catch (v: RelavoiException.Validation) {
@@ -93,8 +93,8 @@ class SessionManagerTest {
 
         try {
             SessionManagerImpl.instance.create(
-                agentPhone = "+2348011111111",
-                customerPhone = "+2348022222222",
+                agentPhone = "+2349000000001",
+                customerPhone = "+2349000000002",
             )
             fail("expected Unauthorized")
         } catch (u: RelavoiException.Unauthorized) {
@@ -107,7 +107,7 @@ class SessionManagerTest {
         // Seed the cache via create.
         server.enqueue(MockResponse().setResponseCode(200).setBody("""{"accessToken":"jwt","expiresIn":900}"""))
         server.enqueue(MockResponse().setResponseCode(200).setBody(SAMPLE_SESSION))
-        SessionManagerImpl.instance.create("+2348011111111", "+2348022222222")
+        SessionManagerImpl.instance.create("+2349000000001", "+2349000000002")
         val before = server.requestCount
 
         // get() should not increment.
@@ -128,7 +128,7 @@ class SessionManagerTest {
     fun `end removes the session from the cache`() = runBlocking {
         server.enqueue(MockResponse().setResponseCode(200).setBody("""{"accessToken":"jwt","expiresIn":900}"""))
         server.enqueue(MockResponse().setResponseCode(200).setBody(SAMPLE_SESSION))
-        SessionManagerImpl.instance.create("+2348011111111", "+2348022222222")
+        SessionManagerImpl.instance.create("+2349000000001", "+2349000000002")
         assertNotNull(SessionManagerImpl.instance.cachedForTest("sess-1"))
 
         server.enqueue(MockResponse().setResponseCode(200).setBody(ENDED_SESSION))
@@ -143,7 +143,7 @@ class SessionManagerTest {
         server.enqueue(MockResponse().setResponseCode(200).setBody(
             """{"verified":true,"context":"Your rider is calling","sessionId":"sess-1","expiresAt":"2026-05-22T10:00:00Z"}"""
         ))
-        val r = SessionManagerImpl.instance.verify("+2348022222222")
+        val r = SessionManagerImpl.instance.verify("+2349000000002")
         assertTrue(r.verified)
         assertEquals("Your rider is calling", r.context)
         assertEquals("sess-1", r.sessionId)
@@ -166,7 +166,7 @@ class SessionManagerTest {
             {
               "id":"sess-1",
               "tenantId":"tenant-123",
-              "proxyNumber":"+2349099999999",
+              "proxyNumber":"+2349000000100",
               "state":"PENDING",
               "directionMode":"BIDIRECTIONAL",
               "metadata":{"orderId":"ORD-1","count":3,"nested":{"a":1}},
@@ -188,7 +188,7 @@ class SessionManagerTest {
             {
               "id":"sess-1",
               "tenantId":"tenant-123",
-              "proxyNumber":"+2349099999999",
+              "proxyNumber":"+2349000000100",
               "state":"GRACE_PERIOD",
               "directionMode":"BIDIRECTIONAL",
               "metadata":{},
