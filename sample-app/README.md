@@ -1,13 +1,28 @@
 # Relavoi Android Sample App
 
 Developer test harness for the Relavoi Android SDK. Not a production UI: a column
-of buttons that each exercise one SDK feature against the **live backend**
-(`https://api.relavoi.com/v1`) using our shared test workspace.
+of buttons that each exercise one SDK feature against the backend at
+`https://api.relavoi.com/v1`, using a workspace of your own.
 
-## Credentials (one-time)
+## Credentials: use a workspace of your own
 
-Secrets are **not** committed. Copy the template and fill in the test workspace's
-key/secret (shared out-of-band):
+This harness does not ship with a workspace, and the keys to ours are not
+shared. A sandbox key is free and takes about a minute, and it means the
+sessions you create while trying the SDK are yours rather than mixed into
+somebody else's test data.
+
+1. Sign up at <https://app.relavoi.com/signup>.
+2. Open **API & Keys** in the dashboard and press **Generate sandbox keys**.
+   The key and the secret are shown once, when they are generated, so copy
+   both before leaving the page. Regenerating invalidates the previous pair.
+3. The workspace id is on that same page, inside the ready-made SDK snippets.
+
+Sandbox keys talk to the same backend as live ones and need no approval. What
+they will not do is place a real call: a sandbox session is routed and recorded
+exactly as a live one but never reaches the carrier, which is what makes it
+safe to run this harness against the numbers below.
+
+Then put the three values in a gitignored properties file:
 
 ```
 cp sample-app/secrets.properties.example sample-app/secrets.properties
@@ -15,13 +30,11 @@ cp sample-app/secrets.properties.example sample-app/secrets.properties
 # RELAVOI_API_SECRET and RELAVOI_TENANT_ID
 ```
 
-`secrets.properties` is gitignored. `build.gradle.kts` reads it into `BuildConfig`
-at build time. The base URL (`https://api.relavoi.com/v1`) defaults to the live
-value; the key, the secret and the workspace id all have to be filled in. The
-workspace id is not a secret, but it is ours and this repository is public, so
-it is not written down here. It is shared out of band with the key and secret, and the dashboard
-shows it beside the ready-made snippets on its API keys page. The SDK derives the WebSocket URL
-from the base URL.
+`secrets.properties` is gitignored, and `build.gradle.kts` reads it into
+`BuildConfig` at build time. Only the base URL has a working default; the key,
+the secret and the workspace id are all placeholders until you fill them in,
+and the app will fail to initialise while they are. The SDK derives the
+WebSocket URL from the base URL.
 
 ## Run it
 
