@@ -11,13 +11,17 @@ key/secret (shared out-of-band):
 
 ```
 cp sample-app/secrets.properties.example sample-app/secrets.properties
-# then edit sample-app/secrets.properties and set RELAVOI_API_KEY / RELAVOI_API_SECRET
+# then edit sample-app/secrets.properties and set RELAVOI_API_KEY,
+# RELAVOI_API_SECRET and RELAVOI_TENANT_ID
 ```
 
 `secrets.properties` is gitignored. `build.gradle.kts` reads it into `BuildConfig`
-at build time; the tenant ID (`f656ac1b-3b5d-4af0-8ff1-c4cbc1076144`) and base URL
-(`https://api.relavoi.com/v1`) default to the live values, so only the key/secret
-need filling in. The SDK derives the WebSocket URL from the base URL.
+at build time. The base URL (`https://api.relavoi.com/v1`) defaults to the live
+value; the key, the secret and the workspace id all have to be filled in. The
+workspace id is not a secret, but it is ours and this repository is public, so
+it is not written down here. It is shared out of band with the key and secret, and the dashboard
+shows it beside the ready-made snippets on its API keys page. The SDK derives the WebSocket URL
+from the base URL.
 
 ## Run it
 

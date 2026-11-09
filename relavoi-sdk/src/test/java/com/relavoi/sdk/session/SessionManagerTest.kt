@@ -141,11 +141,11 @@ class SessionManagerTest {
     fun `verify parses VerificationResult correctly`() = runBlocking {
         server.enqueue(MockResponse().setResponseCode(200).setBody("""{"accessToken":"jwt","expiresIn":900}"""))
         server.enqueue(MockResponse().setResponseCode(200).setBody(
-            """{"verified":true,"context":"Your Chowdeck rider is calling","sessionId":"sess-1","expiresAt":"2026-05-22T10:00:00Z"}"""
+            """{"verified":true,"context":"Your rider is calling","sessionId":"sess-1","expiresAt":"2026-05-22T10:00:00Z"}"""
         ))
         val r = SessionManagerImpl.instance.verify("+2348022222222")
         assertTrue(r.verified)
-        assertEquals("Your Chowdeck rider is calling", r.context)
+        assertEquals("Your rider is calling", r.context)
         assertEquals("sess-1", r.sessionId)
     }
 

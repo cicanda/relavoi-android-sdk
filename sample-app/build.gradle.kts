@@ -30,7 +30,7 @@ android {
 
         buildConfigField("String", "RELAVOI_API_KEY", "\"${secret("RELAVOI_API_KEY", "YOUR_API_KEY")}\"")
         buildConfigField("String", "RELAVOI_API_SECRET", "\"${secret("RELAVOI_API_SECRET", "YOUR_API_SECRET")}\"")
-        buildConfigField("String", "RELAVOI_TENANT_ID", "\"${secret("RELAVOI_TENANT_ID", "f656ac1b-3b5d-4af0-8ff1-c4cbc1076144")}\"")
+        buildConfigField("String", "RELAVOI_TENANT_ID", "\"${secret("RELAVOI_TENANT_ID", "YOUR_TENANT_ID")}\"")
         buildConfigField("String", "RELAVOI_BASE_URL", "\"${secret("RELAVOI_BASE_URL", "https://api.relavoi.com/v1")}\"")
     }
 
