@@ -24,7 +24,19 @@ jobs:
       - name: Generate wrapper
         # gradle-wrapper.jar is intentionally not committed (binary). The setup-gradle
         # action provides the gradle CLI we use to materialize the wrapper jar.
-        run: gradle wrapper --gradle-version 8.7
+        #
+        # --no-validate-url because the validation is a HEAD request to
+        # services.gradle.org, and on 9 November 2026 that endpoint answered 504
+        # to HEAD while answering GET perfectly well. It failed two runs in a
+        # row on a commit that touched one KDoc comment and three README lines.
+        #
+        # Nothing is lost by skipping it. The validation asks whether the
+        # distribution is fetchable; the very next step runs ./gradlew, which
+        # fetches it over GET and fails loudly if it is genuinely not there. All
+        # the probe added was a third party's HEAD endpoint on the critical path
+        # of every build in this repository, checking something the next line
+        # checks for real.
+        run: gradle wrapper --gradle-version 8.7 --no-validate-url
 
       - name: Build SDK (release)
         run: ./gradlew :relavoi-sdk:assembleRelease
