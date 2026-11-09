@@ -33,7 +33,7 @@ import java.util.Locale
 
 /**
  * Developer test harness for the Relavoi Android SDK against the live backend
- * (api.relavoi.com, Bolt Nigeria test tenant). Not a production UI — a column of
+ * (api.relavoi.com, our shared test workspace). Not a production UI — a column of
  * buttons that each exercise one SDK feature and append the result to a log view.
  *
  * The UI is built programmatically on purpose: no layout XML to keep in sync.

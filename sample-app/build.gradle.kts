@@ -18,8 +18,8 @@ android {
 
         // Credentials come from a gitignored `secrets.properties` in this module so
         // real keys never land in git (these are public repos). Copy
-        // `secrets.properties.example` → `secrets.properties` and fill in the Bolt
-        // Nigeria test key/secret. Tenant ID and base URL are not secrets, so they
+        // `secrets.properties.example` → `secrets.properties` and fill in the test
+        // workspace's key/secret. Tenant ID and base URL are not secrets, so they
         // default to the live values here.
         // BuildConfig fields are surfaced as `com.relavoi.sdk.sample.BuildConfig.*`.
         val secretsFile = project.file("secrets.properties")

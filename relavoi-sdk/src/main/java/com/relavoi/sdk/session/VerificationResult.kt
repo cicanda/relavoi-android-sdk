@@ -8,8 +8,8 @@ import kotlinx.serialization.Serializable
  *
  * @property verified True if the currently-active call originates from a Relavoi-masked
  *  proxy number known to belong to this tenant.
- * @property context Optional human-readable banner string (e.g. `"Your Chowdeck rider
- *  is calling"`). Null for unverified results.
+ * @property context Optional human-readable banner string naming a role rather than
+ *  a brand (e.g. `"Your rider is calling"`). Null for unverified results.
  * @property sessionId The session id that backs the verified call, when applicable.
  * @property expiresAt ISO-8601 timestamp at which the verification result becomes stale.
  */

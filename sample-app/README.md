@@ -2,11 +2,11 @@
 
 Developer test harness for the Relavoi Android SDK. Not a production UI: a column
 of buttons that each exercise one SDK feature against the **live backend**
-(`https://api.relavoi.com/v1`) using the **Bolt Nigeria** test tenant.
+(`https://api.relavoi.com/v1`) using our shared test workspace.
 
 ## Credentials (one-time)
 
-Secrets are **not** committed. Copy the template and fill in the Bolt Nigeria test
+Secrets are **not** committed. Copy the template and fill in the test workspace's
 key/secret (shared out-of-band):
 
 ```
